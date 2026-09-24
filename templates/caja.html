@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 - Panel de Caja y Mapa de Mesas</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #050505; color: #f8fafc; margin: 0; padding: 20px; }
+        
+        .caja-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #ef4444; padding-bottom: 15px; }
+        .logo-100-caja { font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444; letter-spacing: 2px; margin: 0; }
+        .sub-slogan-caja { font-size: 0.75rem; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; margin-top: 4px; }
+
+        .leyenda { display: flex; justify-content: center; gap: 20px; margin-bottom: 25px; font-size: 0.9rem; flex-wrap: wrap; }
+        .leyenda-item { display: flex; align-items: center; gap: 6px; }
+        .punto { width: 14px; height: 14px; border-radius: 50%; }
+        
+        .mapa-grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; max-width: 1100px; margin: 0 auto; }
+        
+        .mesa-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+        .mesa-btn:hover { transform: scale(1.05); }
+
+        .mesa-verde { background-color: #22c55e; color: #052e16; } 
+        .mesa-rojo { background-color: #ef4444; color: #fef2f2; animation: parpadeo 1.2s infinite; } 
+        .mesa-amarillo { background-color: #eab308; color: #422006; } 
+
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .mesa-sub { font-size: 0.75rem; margin-top: 4px; opacity: 0.9; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; }
+        .modal-content { background: #111827; padding: 25px; border-radius: 12px; width: 450px; max-width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.8); border: 1px solid #374151; }
+        .modal-content h2 { margin-top: 0; color: #f43f5e; display: flex; justify-content: space-between; align-items: center; }
+        .cerrar-modal { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+        
+        .seccion-titulo { font-size: 0.9rem; font-weight: bold; color: #38bdf8; margin-top: 15px; margin-bottom: 5px; border-bottom: 1px solid #1f2937; padding-bottom: 3px; }
+        .lista-consumo { max-height: 130px; overflow-y: auto; background: #050505; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
+        .total-modal { font-size: 1rem; font-weight: bold; text-align: right; margin-bottom: 10px; color: #94a3b8; }
+        
+        .caja-total-global { background: #064e3b; border: 1px solid #059669; padding: 12px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .caja-total-global span:first-child { font-weight: bold; color: #34d399; font-size: 0.95rem; }
+        .caja-total-global span:last-child { font-size: 1.3rem; font-weight: bold; color: #34d399; }
+
+        .acciones-modal { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .btn-accion { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-aceptar { background: #eab308; color: #422006; }
+        .btn-cobrar { background: #22c55e; color: #052e16; }
+        .btn-cerrar { background: #374151; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="caja-header">
+        <h1 class="logo-100-caja">100</h1>
+        <div class="sub-slogan-caja">Control de Caja - One More Night (PIN actual: <span style="color:#38bdf8;">7420</span>)</div>
+    </div>
+
+    <div class="leyenda">
+        <div class="leyenda-item"><div class="punto" style="background: #22c55e;"></div> Libre</div>
+        <div class="leyenda-item"><div class="punto" style="background: #ef4444;"></div> Pedido Nuevo</div>
+        <div class="leyenda-item"><div class="punto" style="background: #eab308;"></div> En Proceso / Abierta</div>
+    </div>
+
+    <div class="mapa-grilla" id="grilla-mesas"></div>
+
+    <div class="modal" id="modalMesa">
+        <div class="modal-content">
+            <h2>Mesa N° <span id="modalMesaNum">1</span> <button class="cerrar-modal" onclick="cerrarModal()">×</button></h2>
+            <div id="modalEstadoInfo" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 10px;"></div>
+            
+            <div class="seccion-titulo">Consumo Actual (Pendiente de cobro)</div>
+            <div class="lista-consumo" id="modalListaItems"></div>
+            <div class="total-modal">Subtotal actual: $ <span id="modalTotal">0</span></div>
+
+            <div class="seccion-titulo">Historial de Consumos Anteriores de la Noche</div>
+            <div id="modalHistorial" style="max-height: 150px; overflow-y: auto;"></div>
+
+            <div class="caja-total-global">
+                <span>TOTAL ACUMULADO (Noche):</span>
+                <span>$ <span id="modalTotalGlobal">0</span></span>
+            </div>
+
+            <div class="acciones-modal" id="modalBotonera"></div>
+        </div>
+    </div>
+
+    <script>
+        let mesaSeleccionada = null;
+        let datosGlobalesMesas = {};
+
+        function actualizarMapa() {
+            fetch('/api/mesas')
+                .then(res => res.json())
+                .then(data => {
+                    datosGlobalesMesas = data;
+                    renderizarGrilla(data);
+                    if (mesaSeleccionada !== null) abrirModal(mesaSeleccionada);
+                });
+        }
+
+        function renderizarGrilla(mesas) {
+            const grilla = document.getElementById('grilla-mesas');
+            grilla.innerHTML = '';
+            for (let i = 1; i <= 40; i++) {
+                let m = mesas[i.toString()];
+                let claseColor = 'mesa-verde', textoSub = 'Libre';
+                if (m.estado === 'rojo') { claseColor = 'mesa-rojo'; textoSub = '¡Nuevo!'; }
+                else if (m.estado === 'amarillo') { claseColor = 'mesa-amarillo'; textoSub = `$${m.total}`; }
+
+                let btn = document.createElement('button');
+                btn.className = `mesa-btn ${claseColor}`;
+                btn.innerHTML = `Mesa ${i} <span class="mesa-sub">${textoSub}</span>`;
+                btn.onclick = () => abrirModal(i.toString());
+                grilla.appendChild(btn);
+            }
+        }
+
+        function abrirModal(numMesa) {
+            mesaSeleccionada = numMesa;
+            let m = datosGlobalesMesas[numMesa];
+            document.getElementById('modalMesaNum').innerText = numMesa;
+            document.getElementById('modalTotal').innerText = m.total;
+            
+            let estadoTexto = "Estado actual: Libre";
+            if (m.estado === 'rojo') estadoTexto = "Estado actual: 🔴 Pedido nuevo sin atender";
+            if (m.estado === 'amarillo') estadoTexto = "Estado actual: 🟡 Consumo abierto / En proceso";
+            document.getElementById('modalEstadoInfo').innerText = estadoTexto;
+
+            let listaDiv = document.getElementById('modalListaItems');
+            listaDiv.innerHTML = m.items.length === 0 ? '<div style="color: #64748b; text-align: center; font-size: 0.85rem;">No hay consumos pendientes.</div>' : '';
+            m.items.forEach(item => {
+                let row = document.createElement('div');
+                row.className = 'item-row';
+                row.innerHTML = `<span>${item.cantidad}x ${item.nombre}</span> <span>$${item.precio * item.cantidad}</span>`;
+                listaDiv.appendChild(row);
+            });
+
+            let historialDiv = document.getElementById('modalHistorial');
+            historialDiv.innerHTML = '';
+            let sumaHistorial = 0;
+            if (!m.historial_consumos || m.historial_consumos.length === 0) {
+                historialDiv.innerHTML = '<div style="color: #64748b; text-align: center; font-size: 0.85rem; padding: 5px;">Sin historial previo esta noche.</div>';
+            } else {
+                m.historial_consumos.forEach((reg, index) => {
+                    sumaHistorial += reg.total;
+                    let block = document.createElement('div');
+                    block.style.background = '#050505'; block.style.padding = '8px'; block.style.borderRadius = '6px'; block.style.marginBottom = '6px'; block.style.fontSize = '0.85rem';
+                    let itemsHtml = reg.items.map(i => `&bull; ${i.cantidad}x ${i.nombre} ($${i.precio * i.cantidad})`).join('<br>');
+                    block.innerHTML = `<div style="color: #f43f5e; font-weight: bold; margin-bottom: 3px;">Consumo #${index + 1} (Pagado a las ${reg.hora})</div>` +
+                                      `<div style="margin-left: 5px; color: #cbd5e1;">${itemsHtml}</div>` +
+                                      `<div style="text-align: right; color: #34d399; font-weight: bold; margin-top: 2px;">Subtotal: $${reg.total}</div>`;
+                    historialDiv.appendChild(block);
+                });
+            }
+
+            document.getElementById('modalTotalGlobal').innerText = m.total + sumaHistorial;
+
+            let botonera = document.getElementById('modalBotonera');
+            botonera.innerHTML = '';
+            if (m.estado === 'rojo') {
+                let btnAceptar = document.createElement('button');
+                btnAceptar.className = 'btn-accion btn-aceptar';
+                btnAceptar.innerText = 'ACEPTAR PEDIDO (Pasar a Amarillo)';
+                btnAceptar.onclick = () => aceptarPedido(numMesa);
+                botonera.appendChild(btnAceptar);
+            } else if (m.estado === 'amarillo') {
+                let btnCobrar = document.createElement('button');
+                btnCobrar.className = 'btn-accion btn-cobrar';
+                btnCobrar.innerText = 'CONFIRMAR PAGO Y CERRAR MESA (Pasar a Verde)';
+                btnCobrar.onclick = () => cobrarMesa(numMesa);
+                botonera.appendChild(btnCobrar);
+            }
+
+            let btnCerrar = document.createElement('button');
+            btnCerrar.className = 'btn-accion btn-cerrar';
+            btnCerrar.innerText = 'Cerrar ventana';
+            btnCerrar.onclick = cerrarModal;
+            botonera.appendChild(btnCerrar);
+
+            document.getElementById('modalMesa').style.display = 'flex';
+        }
+
+        function cerrarModal() { mesaSeleccionada = null; document.getElementById('modalMesa').style.display = 'none'; }
+        function aceptarPedido(numMesa) { fetch('/aceptar_pedido/' + numMesa, { method: 'POST' }).then(() => { actualizarMapa(); cerrarModal(); }); }
+        function cobrarMesa(numMesa) {
+            if (confirm("¿Confirmar que la mesa " + numMesa + " abonó el consumo actual?")) {
+                fetch('/cobrar_mesa/' + numMesa, { method: 'POST' }).then(() => { actualizarMapa(); cerrarModal(); });
+            }
+        }
+
+        setInterval(actualizarMapa, 3000);
+        actualizarMapa();
+    </script>
+</body>
+</html>
