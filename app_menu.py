@@ -35,5 +35,12 @@ def recibir_pedido():
         return jsonify({"success": True})
     return jsonify({"success": False}), 400
 
+@app.route('/api/liberar/<mesa>', methods=['POST'])
+def liberar_mesa(mesa):
+    if mesa in mesas_estado:
+        mesas_estado[mesa] = []
+        return jsonify({"success": True})
+    return jsonify({"success": False}), 400
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
