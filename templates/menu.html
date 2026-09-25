@@ -3,170 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100 - One More Night | Menú</title>
+    <title>100 - Carta Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #050505; color: #f8fafc; margin: 0; padding: 15px; }
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #141414;
+            --accent: #ffffff;
+            --text-main: #f0f0f0;
+            --text-muted: #888888;
+            --border: #262626;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
         
-        .header-boliche { text-align: center; margin-bottom: 20px; padding-top: 10px; border-bottom: 2px solid #ef4444; padding-bottom: 15px; }
-        .logo-100 { font-size: 3rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444; letter-spacing: 2px; margin: 0; }
-        .sub-slogan { font-size: 0.85rem; color: #94a3b8; letter-spacing: 4px; text-transform: uppercase; margin-top: 5px; }
-        .mesa-badge { background: #1e293b; display: inline-block; padding: 5px 12px; border-radius: 20px; font-weight: bold; color: #38bdf8; margin-top: 8px; border: 1px solid #334155; font-size: 0.85rem; }
+        header {
+            text-align: center;
+            padding: 30px 20px 15px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(10,10,10,0.95);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-img {
+            max-width: 90px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1));
+        }
+        h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; }
+        .mesa-badge {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 4px 12px;
+            background: #222;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #aaa;
+            border: 1px solid #333;
+        }
 
-        /* Capa de Validación de PIN */
-        #pinOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .pin-box { background: #111827; padding: 25px; border-radius: 12px; width: 320px; border: 1px solid #ef4444; text-align: center; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
-        .pin-box h3 { color: #fff; margin-bottom: 10px; }
-        .pin-input { width: 80%; padding: 10px; font-size: 1.2rem; text-align: center; background: #1f2937; border: 1px solid #374151; color: white; border-radius: 6px; margin-bottom: 15px; letter-spacing: 3px; }
-        .btn-pin { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; }
+        /* Categorías */
+        .categorias {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border);
+            scrollbar-width: none;
+        }
+        .categorias::-webkit-scrollbar { display: none; }
+        .cat-btn {
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .cat-btn.active {
+            background: #fff;
+            color: #000;
+            border-color: #fff;
+            font-weight: 600;
+        }
 
-        .categoria-titulo { color: #f43f5e; font-size: 1.1rem; border-bottom: 1px solid #1e293b; padding-bottom: 5px; margin-top: 20px; font-weight: bold; }
-        .bebida-card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .bebida-info h3 { margin: 0 0 5px 0; font-size: 1rem; color: #fff; }
-        .precio { color: #34d399; font-weight: bold; font-size: 0.95rem; }
+        /* Contenedor de Tragos */
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .seccion-titulo {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin: 25px 0 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-left: 3px solid #fff;
+            padding-left: 10px;
+        }
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+        .item-info { flex-grow: 1; padding-right: 15px; }
+        .item-nombre { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+        .item-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.3; }
+        .item-precio { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
         
-        .controles-cantidad { display: flex; align-items: center; gap: 10px; }
-        .btn-cant { background: #374151; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        .input-cant { width: 35px; text-align: center; background: #1f2937; border: none; color: white; font-weight: bold; font-size: 1rem; border-radius: 4px; }
+        .contador {
+            display: flex;
+            align-items: center;
+            background: #1f1f1f;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .btn-cant {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+        .num-cant {
+            width: 28px;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
 
-        .carrito-flotante { position: fixed; bottom: 0; left: 0; width: 100%; background: #111827; border-top: 2px solid #ef4444; padding: 15px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
-        .btn-enviar { background: #ef4444; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; text-transform: uppercase; }
+        /* Barra Inferior del Pedido */
+        .footer-pedido {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .total-texto { font-size: 0.9rem; color: var(--text-muted); }
+        .total-monto { font-size: 1.2rem; font-weight: 700; color: #fff; }
+        .btn-enviar {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-enviar:active { transform: scale(0.96); }
+
+        /* Pantalla de PIN */
+        #pin-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .pin-box {
+            background: #141414;
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 350px;
+        }
+        .pin-box h2 { font-size: 1.4rem; margin-bottom: 10px; }
+        .pin-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+        .pin-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 14px;
+            font-size: 1.5rem;
+            text-align: center;
+            border-radius: 8px;
+            letter-spacing: 6px;
+            margin-bottom: 15px;
+        }
+        .pin-btn {
+            width: 100%;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .error-pin { color: #ff4444; font-size: 0.8rem; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Ventana flotante para pedir el PIN al escanear el QR -->
-    <div id="pinOverlay">
+    <!-- Ventana de PIN de Seguridad -->
+    <div id="pin-overlay">
         <div class="pin-box">
-            <h2 class="logo-100" style="font-size: 2rem; margin-bottom: 5px;">100</h2>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 15px;">ONE MORE NIGHT</div>
-            <h3>Ingresa el PIN de la Mesa</h3>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 15px;">Solicítalo al personal del boliche para habilitar los pedidos.</p>
-            <input type="password" id="inputPin" class="pin-input" placeholder="----" maxlength="4">
-            <br>
-            <button class="btn-pin" onclick="validarPin()">Ingresar al Menú</button>
-            <div id="errorPin" style="color: #f87171; font-size: 0.8rem; margin-top: 10px;"></div>
+            <img src="{{ url_for('static', filename='logo_100.png') }}" alt="100 Logo" style="width: 50px; margin-bottom: 15px;">
+            <h2>INGRESO MESA</h2>
+            <p>Ingresa el PIN provisto en la barra o mesa para acceder a la carta.</p>
+            <input type="password" id="pin-input" class="pin-input" maxlength="6" placeholder="••••">
+            <button onclick="validarPin()" class="pin-btn">INGRESAR</button>
+            <div id="error-msg" class="error-pin">PIN incorrecto. Intenta nuevamente.</div>
         </div>
     </div>
 
-    <div class="header-boliche">
-        <h1 class="logo-100">100</h1>
-        <div class="sub-slogan">One More Night</div>
-        <div class="mesa-badge">Mesa N° <span id="numMesaTexto">{{ mesa }}</span></div>
+    <header>
+        <img src="{{ url_for('static', filename='logo_100.png') }}" alt="100 Logo" class="logo-img">
+        <h1>100 ONE MORE NIGHT</h1>
+        <div class="mesa-badge" id="label-mesa">Mesa --</div>
+    </header>
+
+    <div class="categorias">
+        <button class="cat-btn active" onclick="filtrar('todos')">Todo</button>
+        <button class="cat-btn" onclick="filtrar('Cocktails')">Cocktails</button>
+        <button class="cat-btn" onclick="filtrar('Vinos & Espumantes')">Vinos & Espumantes</button>
+        <button class="cat-btn" onclick="filtrar('Cervezas')">Cervezas</button>
+        <button class="cat-btn" onclick="filtrar('Sin Alcohol')">Sin Alcohol</button>
     </div>
 
-    <div id="menu-container"></div>
-    <div style="height: 90px;"></div>
+    <div class="container" id="menu-container">
+        <!-- Los ítems se cargan dinámicamente -->
+    </div>
 
-    <div class="carrito-flotante">
+    <div class="footer-pedido">
         <div>
-            <div style="font-size: 0.8rem; color: #94a3b8;">Total Pedido:</div>
-            <div style="font-size: 1.2rem; font-weight: bold; color: #34d399;">$ <span id="totalGeneral">0</span></div>
+            <div class="total-texto">Total estimado</div>
+            <div class="total-monto" id="total-precio">$0</div>
         </div>
-        <button class="btn-enviar" onclick="enviarPedido()">Enviar Pedido</button>
+        <button class="btn-enviar" onclick="enviarPedido()">ENVIAR PEDIDO</button>
     </div>
 
     <script>
-        const numeroMesa = "{{ mesa }}";
-        const bebidas = [
-            {% for b in bebidas %}
-            { id: {{ b.id }}, nombre: "{{ b.nombre }}", precio: {{ b.precio }}, categoria: "{{ b.categoria }}" },
-            {% endfor %}
+        // Carta oficial de tragos y bebidas de 100
+        const cartaItems = [
+            { id: 1, categoria: "Cocktails", nombre: "Fernet 100", desc: "Fernet Branca con Coca-Cola tirada bien helada.", precio: 7000 },
+            { id: 2, categoria: "Cocktails", nombre: "Gin Tonic 100", desc: "Gin artesanal, agua tónica premium, rodaja de limón y botánicos.", precio: 7500 },
+            { id: 3, categoria: "Cocktails", nombre: "Vodka con Speed / Naranja", desc: "Vodka importado con bebida energizante o jugo cítrico.", precio: 7500 },
+            { id: 4, categoria: "Cocktails", nombre: "Campari Orange", desc: "Campari con jugo de naranja exprimido y hielo.", precio: 7200 },
+            { id: 5, categoria: "Cocktails", nombre: "Ron con Cola", desc:ñ "Ron añejo con Coca-Cola y lima.", precio: 7000 },
+            { id: 6, categoria: "Vinos & Espumantes", nombre: "Champagne Extra Brut", desc: "Botella 750ml ideal para brindar en la noche.", precio: 22000 },
+            { id: 7, categoria: "Vinos & Espumantes", nombre: "Vino Tinto Malbec (Copa)", desc: "Copa de vino seleccionado de alta gama.", precio: 6000 },
+            { id: 8, categoria: "Cervezas", nombre: "Cerveza Corona (Línea)", desc: "Botella 330ml con limón.", precio: 5500 },
+            { id: 9, categoria: "Cervezas", nombre: "Cerveza Patagonia Amber Lager", desc: "Pinta tirada artesanal.", precio: 5800 },
+            { id: 10, categoria: "Sin Alcohol", nombre: "Agua Mineral / Saborizada", desc: "500ml sin gas o con gas.", python: 3000, precio: 3000 },
+            { id: 11, categoria: "Sin Alcohol", nombre: "Bebida Energizante Speed", desc: "Lata 250ml.", precio: 4500 }
         ];
-        let cantidades = {};
 
+        let carrito = {};
+        let mesaActual = "1";
+
+        // Obtener número de mesa de la URL (?mesa=5)
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('mesa')) {
+            mesaActual = urlParams.get('mesa');
+        }
+        document.getElementById('label-mesa').innerText = "Mesa " + mesaActual;
+
+        // Validar PIN introducido contra el servidor
         function validarPin() {
-            let pin = document.getElementById('inputPin').value;
-            fetch('/verificar_pin', {
+            let pinIngresado = document.getElementById('pin-input').value;
+            fetch('/api/verificar-pin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: pin })
+                body: JSON.stringify({ pin: pinIngresado })
             })
             .then(res => res.json())
             .then(data => {
-                if(data.status === 'success') {
-                    document.getElementById('pinOverlay').style.display = 'none';
-                    renderizarMenu();
+                if(data.success) {
+                    document.getElementById('pin-overlay').style.display = 'none';
                 } else {
-                    document.getElementById('errorPin').innerText = data.mensaje;
+                    let err = document.getElementById('error-msg');
+                    err.style.display = 'block';
+                    setTimeout(() => err.style.display = 'none', 3000);
                 }
             });
         }
 
-        function renderizarMenu() {
+        function renderizarMenu(filtro = 'todos') {
             const container = document.getElementById('menu-container');
-            let categorias = {};
-            bebidas.forEach(b => {
-                if (!categorias[b.categoria]) categorias[b.categoria] = [];
-                categorias[b.categoria].push(b);
-            });
+            container.innerHTML = '';
 
-            let html = '';
-            for (let cat in categorias) {
-                html += `<div class="categoria-titulo">${cat}</div>`;
-                categorias[cat].forEach(bebida => {
-                    let cant = cantidades[bebida.id] || 0;
-                    html += `
-                        <div class="bebida-card">
-                            <div class="bebida-info">
-                                <h3>${bebida.nombre}</h3>
-                                <div class="precio">$${bebida.precio}</div>
+            let categoriasUnicas = filtro === 'todos' ? [...new Set(cartaItems.map(i => i.categoria))] : [filtro];
+
+            categoriasUnicas.forEach(cat => {
+                let itemsCat = cartaItems.filter(i => i.categoria === cat);
+                if(itemsCat.length === 0) return;
+
+                let htmlCat = `<div class="seccion-titulo">${cat}</div>`;
+                itemsCat.forEach(item => {
+                    let cant = carrito[item.id] || 0;
+                    htmlCat += `
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <div class="item-nombre">${item.nombre}</div>
+                                <div class="item-desc">${item.desc}</div>
+                                <div class="item-precio">$${item.precio.toLocaleString()}</div>
                             </div>
-                            <div class="controles-cantidad">
-                                <button class="btn-cant" onclick="cambiarCantidad(${bebida.id}, -1)">-</button>
-                                <input type="text" class="input-cant" id="cant-${bebida.id}" value="${cant}" readonly>
-                                <button class="btn-cant" onclick="cambiarCantidad(${bebida.id}, 1)">+</button>
+                            <div class="contador">
+                                <button class="btn-cant" onclick="cambiarCant(${item.id}, -1)">-</button>
+                                <span class="num-cant" id="cant-${item.id}">${cant}</span>
+                                <button class="btn-cant" onclick="cambiarCant(${item.id}, 1)">+</button>
                             </div>
                         </div>
                     `;
                 });
-            }
-            container.innerHTML = html;
+                container.innerHTML += htmlCat;
+            });
         }
 
-        function cambiarCantidad(id, delta) {
-            if (!cantidades[id]) cantidades[id] = 0;
-            cantidades[id] += delta;
-            if (cantidades[id] < 0) cantidades[id] = 0;
-            document.getElementById(`cant-${id}`).value = cantidades[id];
-            calcularTotal();
+        function filtrar(cat) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizarMenu(cat);
         }
 
-        function calcularTotal() {
+        function cambiarCant(id, delta) {
+            if(!carrito[id]) carrito[id] = 0;
+            carrito[id] += delta;
+            if(carrito[id] < 0) carrito[id] = 0;
+            
+            document.getElementById(`cant-${id}`).innerText = carrito[id];
+            actualizarTotal();
+        }
+
+        function actualizarTotal() {
             let total = 0;
-            bebidas.forEach(b => { if (cantidades[b.id]) total += b.precio * cantidades[b.id]; });
-            document.getElementById('totalGeneral').innerText = total;
+            for(let id in carrito) {
+                let item = cartaItems.find(i => i.id == id);
+                if(item) total += item.precio * carrito[id];
+            }
+            document.getElementById('total-precio').innerText = '$' + total.toLocaleString();
         }
 
         function enviarPedido() {
-            let items = [];
-            bebidas.forEach(b => {
-                if (cantidades[b.id] && cantidades[b.id] > 0) {
-                    items.push({ nombre: b.nombre, precio: b.precio, cantidad: cantidades[b.id] });
+            let itemsPedido = [];
+            for(let id in carrito) {
+                if(carrito[id] > 0) {
+                    let item = cartaItems.find(i => i.id == id);
+                    itemsPedido.push({ nombre: item.nombre, cantidad: carrito[id], precio: item.precio });
                 }
-            });
+            }
 
-            if (items.length === 0) {
+            if(itemsPedido.length === 0) {
                 alert("Por favor selecciona al menos una bebida.");
                 return;
             }
 
-            fetch('/enviar_pedido', {
+            fetch('/api/pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mesa: numeroMesa, items: items })
+                body: JSON.stringify({ mesa: mesaActual, items: itemsPedido })
             })
             .then(res => res.json())
             .then(data => {
-                if(data.status === 'success') {
-                    alert("¡Pedido enviado con éxito a la barra de 100!");
-                    cantidades = {};
+                if(data.success) {
+                    alert("¡Pedido enviado con éxito a la barra! En instantes te lo acercamos.");
+                    carrito = {};
                     renderizarMenu();
-                    calcularTotal();
+                    actualizarTotal();
                 } else {
-                    alert("Error: " + data.mensaje);
+                    alert("Hubo un error al enviar el pedido.");
                 }
             });
         }
+
+        // Inicializar
+        renderizarMenu();
     </script>
 </body>
 </html>
