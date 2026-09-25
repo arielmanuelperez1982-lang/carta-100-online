@@ -85,7 +85,7 @@
                 </div>
                 {% if data.items_actuales %}
                     {% for pedido in data.items_actuales %}
-                        {% for item in pedido.items %}
+                        {% for item in pedido['items'] %}
                         <div class="item-lista">• {{ item.cantidad }}x {{ item.nombre }}</div>
                         {% endfor %}
                     {% endfor %}
