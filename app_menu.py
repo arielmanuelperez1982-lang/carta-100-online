@@ -21,26 +21,26 @@ mesas_estado = {
 
 # Carta global de bebidas (editable desde el panel de admin)
 carta_items = [
-    { id: 1, categoria: "Cocktails", nombre: "Fernet 100", desc: "Fernet Branca con Coca-Cola tirada bien helada.", precio: 7000 },
-    { id: 2, categoria: "Cocktails", nombre: "Gin Tonic 100", desc: "Gin artesanal, agua tónica premium, rodaja de limón.", precio: 7500 },
-    { id: 3, categoria: "Cocktails", nombre: "Vodka con Speed / Naranja", desc: "Vodka importado con energizante o jugo cítrico.", precio: 7500 },
-    { id: 4, categoria: "Cocktails", nombre: "Campari Orange", desc: "Campari con jugo de naranja exprimido y hielo.", precio: 7200 },
-    { id: 5, categoria: "Cocktails", nombre: "Ron con Cola", desc: "Ron añejo con Coca-Cola y lima.", precio: 7000 },
-    { id: 6, categoria: "Cocktails", nombre: "Daiquiri de Frutilla / Durazno", desc: "Ron, pulpa de fruta natural, lima y azúcar.", precio: 7800 },
-    { id: 7, categoria: "Cocktails", nombre: "Mojito Tradicional", desc: "Ron blanco, menta fresca, lima, azúcar mascabo y soda.", precio: 7800 },
-    { id: 8, categoria: "Cocktails", nombre: "Mulberry Spritz", desc: "Espumante, cordial de frutos rojos y agua tónica.", precio: 8000 },
-    { id: 9, categoria: "Cocktails", nombre: "Yorkers Vibes", desc: "Bourbon, reducción de frutas de estación y cítricos.", precio: 8500 },
-    { id: 10, categoria: "Cocktails", nombre: "Gangsta Tape", desc: "Trago de autor fuerte a base de ron especiado y jengibre.", precio: 8500 },
-    { id: 11, categoria: "Cocktails", nombre: "100 Night Passion", desc: "Gin, maracuyá, almíbar especiado y toque de lima.", precio: 8500 },
-    { id: 12, categoria: "Vinos & Espumantes", nombre: "Champagne Extra Brut", desc: "Botella 750ml ideal para brindar en la noche.", precio: 22000 },
-    { id: 13, categoria: "Vinos & Espumantes", nombre: "Vino Tinto Malbec (Copa)", desc: "Copa de vino seleccionado de alta gama.", precio: 6000 },
-    { id: 14, categoria: "Vinos & Espumantes", nombre: "Vino Blanco Chardonnay (Copa)", desc: "Copa de vino blanco fresco y frutado.", precio: 6000 },
-    { id: 15, categoria: "Cervezas", nombre: "Cerveza Corona (Línea)", desc: "Botella 330ml con limón.", precio: 5500 },
-    { id: 16, categoria: "Cervezas", nombre: "Cerveza Patagonia Amber Lager", desc: "Pinta tirada artesanal.", precio: 5800 },
-    { id: 17, categoria: "Cervezas", nombre: "Cerveza Patagonia 24.7 (IPA)", desc: "Pinta tirada IPA refrescante y lupulada.", precio: 5800 },
-    { id: 18, categoria: "Sin Alcohol", nombre: "Agua Mineral / Saborizada", desc: "500ml sin gas o con gas.", precio: 3000 },
-    { id: 19, categoria: "Sin Alcohol", nombre: "Bebida Energizante Speed", desc: "Lata 250ml.", precio: 4500 },
-    { id: 20, categoria: "Sin Alcohol", nombre: "Gaseosa Línea Pepsi / 7Up", desc: "Lata 350ml bien fría.", precio: 3500 }
+    { "id": 1, "categoria": "Cocktails", "nombre": "Fernet 100", "desc": "Fernet Branca con Coca-Cola tirada bien helada.", "precio": 7000 },
+    { "id": 2, "categoria": "Cocktails", "nombre": "Gin Tonic 100", "desc": "Gin artesanal, agua tónica premium, rodaja de limón.", "precio": 7500 },
+    { "id": 3, "categoria": "Cocktails", "nombre": "Vodka con Speed / Naranja", "desc": "Vodka importado con energizante o jugo cítrico.", "precio": 7500 },
+    { "id": 4, "categoria": "Cocktails", "nombre": "Campari Orange", "desc": "Campari con jugo de naranja exprimido y hielo.", "precio": 7200 },
+    { "id": 5, "categoria": "Cocktails", "nombre": "Ron con Cola", "desc": "Ron añejo con Coca-Cola y lima.", "precio": 7000 },
+    { "id": 6, "categoria": "Cocktails", "nombre": "Daiquiri de Frutilla / Durazno", "desc": "Ron, pulpa de fruta natural, lima y azúcar.", "precio": 7800 },
+    { "id": 7, "categoria": "Cocktails", "nombre": "Mojito Tradicional", "desc": "Ron blanco, menta fresca, lima, azúcar mascabo y soda.", "precio": 7800 },
+    { "id": 8, "categoria": "Cocktails", "nombre": "Mulberry Spritz", "desc": "Espumante, cordial de frutos rojos y agua tónica.", "precio": 8000 },
+    { "id": 9, "categoria": "Cocktails", "nombre": "Yorkers Vibes", "desc": "Bourbon, reducción de frutas de estación y cítricos.", "precio": 8500 },
+    { "id": 10, "categoria": "Cocktails", "nombre": "Gangsta Tape", "desc": "Trago de autor fuerte a base de ron especiado y jengibre.", "precio": 8500 },
+    { "id": 11, "categoria": "Cocktails", "nombre": "100 Night Passion", "desc": "Gin, maracuyá, almíbar especiado y toque de lima.", "precio": 8500 },
+    { "id": 12, "categoria": "Vinos & Espumantes", "nombre": "Champagne Extra Brut", "desc": "Botella 750ml ideal para brindar en la noche.", "precio": 22000 },
+    { "id": 13, "categoria": "Vinos & Espumantes", "nombre": "Vino Tinto Malbec (Copa)", "desc": "Copa de vino seleccionado de alta gama.", "precio": 6000 },
+    { "id": 14, "categoria": "Vinos & Espumantes", "nombre": "Vino Blanco Chardonnay (Copa)", "desc": "Copa de vino blanco fresco y frutado.", "precio": 6000 },
+    { "id": 15, "categoria": "Cervezas", "nombre": "Cerveza Corona (Línea)", "desc": "Botella 330ml con limón.", "precio": 5500 },
+    { "id": 16, "categoria": "Cervezas", "nombre": "Cerveza Patagonia Amber Lager", "desc": "Pinta tirada artesanal.", "precio": 5800 },
+    { "id": 17, "categoria": "Cervezas", "nombre": "Cerveza Patagonia 24.7 (IPA)", "desc": "Pinta tirada IPA refrescante y lupulada.", "precio": 5800 },
+    { "id": 18, "categoria": "Sin Alcohol", "nombre": "Agua Mineral / Saborizada", "desc": "500ml sin gas o con gas.", "precio": 3000 },
+    { "id": 19, "categoria": "Sin Alcohol", "nombre": "Bebida Energizante Speed", "desc": "Lata 250ml.", "precio": 4500 },
+    { "id": 20, "categoria": "Sin Alcohol", "nombre": "Gaseosa Línea Pepsi / 7Up", "desc": "Lata 350ml bien fría.", "precio": 3500 }
 ]
 
 @app.route('/')
