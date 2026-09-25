@@ -8,66 +8,153 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
         body { background: #0a0a0a; color: #f0f0f0; padding: 20px; }
-        h1 { text-align: center; margin-bottom: 25px; letter-spacing: 2px; }
+        
+        .header-caja { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        .logo-caja { max-width: 45px; filter: drop-shadow(0 2px 5px rgba(255,255,255,0.2)); }
+        h1 { font-size: 1.5rem; letter-spacing: 2px; }
+
         .grid-mesas {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
             gap: 15px;
             max-width: 1200px;
             margin: 0 auto;
         }
         .mesa-card {
             background: #141414;
-            border: 1px solid #262626;
+            border: 2px solid #262626;
             border-radius: 12px;
-            padding: 15px;
-            min-height: 140px;
+            padding: 14px;
+            min-height: 150px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .mesa-card.ocupada { border-color: #fff; background: #1a1a1a; }
-        .mesa-titulo { font-size: 1.1rem; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .item-lista { font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
-        .btn-liberar {
-            background: #333; color: #fff; border: none; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600;
+        .mesa-card:hover { transform: translateY(-2px); }
+
+        /* Estados de color */
+        .mesa-card.libre { border-color: #333; background: #121212; }
+        .mesa-card.preparando { border-color: #ff4444; background: #1a0f0f; } /* Rojo: Para preparar */
+        .mesa-card.pendiente_pago { border-color: #ffbb00; background: #1a180f; } /* Amarillo: Pendiente de pago */
+
+        .mesa-titulo { font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .item-lista { font-size: 0.8rem; color: #ccc; margin-bottom: 3px; }
+        
+        .acciones-mesa { display: flex; gap: 6px; margin-top: 10px; }
+        .btn-accion {
+            flex: 1; background: #222; color: #fff; border: 1px solid #444; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: 600; text-align: center;
         }
-        .btn-liberar:hover { background: #ff4444; }
+        .btn-preparado { background: #ff4444; border-color: #ff4444; color: #000; }
+        .btn-cobrar { background: #ffbb00; border-color: #ffbb00; color: #000; }
+        .btn-pagar { background: #00cc44; border-color: #00cc44; color: #000; }
+
+        /* Modal de Historial */
+        #modal-historial {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px;
+        }
+        .modal-content {
+            background: #141414; border: 1px solid #333; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto;
+        }
+        .modal-content h3 { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .historial-item { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; border-bottom: 1px dashed #222; padding-bottom: 4px; }
+        .btn-cerrar-modal { margin-top: 15px; background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; width: 100%; }
     </style>
-    <!-- Recargar página cada 10 segundos para ver pedidos nuevos -->
     <meta http-equiv="refresh" content="10">
 </head>
 <body>
-    <h1>PANEL DE CAJA - 100 MESAS</h1>
+
+    <div class="header-caja">
+        <img src="{{ url_for('static', filename='logo_100.png') }}" alt="Logo 100" class="logo-caja">
+        <h1>PANEL DE CAJA - 100</h1>
+    </div>
+
     <div class="grid-mesas">
-        {% for num, items in mesas.items() %}
-        <div class="mesa-card {% if items %}ocupada{% endif %}">
+        {% for num, data in mesas.items() %}
+        <div class="mesa-card {{ data.estado }}" onclick="verHistorial('{{ num }}', {{ data.historial | tojson }})">
             <div>
                 <div class="mesa-titulo">
                     <span>Mesa {{ num }}</span>
-                    <span>{% if items %}🔴{% else %}🟢{% endif %}</span>
+                    <span>
+                        {% if data.estado == 'preparando' %}🔴
+                        {% elif data.estado == 'pendiente_pago' %}🟡
+                        {% else %}🟢{% endif %}
+                    </span>
                 </div>
-                {% if items %}
-                    {% for item in items %}
-                    <div class="item-lista">• {{ item.cantidad }}x {{ item.nombre }}</div>
+                {% if data.items_actuales %}
+                    {% for pedido in data.items_actuales %}
+                        {% for item in pedido.items %}
+                        <div class="item-lista">• {{ item.cantidad }}x {{ item.nombre }}</div>
+                        {% endfor %}
                     {% endfor %}
                 {% else %}
-                    <div style="color: #666; font-size: 0.85rem; font-style: italic;">Sin pedidos</div>
+                    <div style="color: #666; font-size: 0.8rem; font-style: italic;">Sin pedidos activos</div>
                 {% endif %}
             </div>
-            {% if items %}
-            <button class="btn-liberar" onclick="liberarMesa('{{ num }}')">LIBERAR MESA</button>
+            
+            {% if data.items_actuales %}
+            <div class="acciones-mesa" onclick="event.stopPropagation()">
+                {% if data.estado == 'preparando' %}
+                <button class="btn-accion btn-cobrar" onclick="cambiarEstado('{{ num }}', 'pendiente_pago')">Pedir Cuenta</button>
+                {% endif %}
+                {% if data.estado == 'pendiente_pago' or data.estado == 'preparando' %}
+                <button class="btn-accion btn-pagar" onclick="cambiarEstado('{{ num }}', 'pagado')">Confirmar Pago</button>
+                {% endif %}
+            </div>
             {% endif %}
         </div>
         {% endfor %}
     </div>
 
+    <!-- Modal de Historial de la Mesa -->
+    <div id="modal-historial" onclick="cerrarModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 id="modal-titulo">Historial de Mesa</h3>
+            <div id="modal-body"></div>
+            <button class="btn-cerrar-modal" onclick="cerrarModal()">CERRAR</button>
+        </div>
+    </div>
+
     <script>
-        function liberarMesa(numMesa) {
-            if(confirm("¿Estás seguro de liberar la mesa " + numMesa + "?")) {
-                fetch('/api/liberar/' + numMesa, { method: 'POST' })
-                .then(() => location.reload());
+        function cambiarEstado(numMesa, nuevoEstado) {
+            fetch('/api/cambiar-estado/' + numMesa, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: nuevoEstado })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) location.reload();
+            });
+        }
+
+        function verHistorial(numMesa, historial) {
+            document.getElementById('modal-titulo').innerText = "Historial Completo - Mesa " + numMesa;
+            let body = document.getElementById('modal-body');
+            body.innerHTML = '';
+            
+            if(!historial || historial.length === 0) {
+                body.innerHTML = '<p style="color:#777; font-size:0.9rem;">No hay registros de pedidos en esta mesa durante la noche.</p>';
+            } else {
+                historial.forEach((h, index) => {
+                    let txt = `<div class="historial-item"><b>Evento #${index+1} (${h.tipo}):</b> `;
+                    if(typeof h.detalle === 'object') {
+                        let detalleStr = h.detalle.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
+                        txt += detalleStr;
+                    } else {
+                        txt += h.detalle;
+                    }
+                    txt += `</div>`;
+                    body.innerHTML += txt;
+                });
             }
+            document.getElementById('modal-historial').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-historial').style.display = 'none';
         }
     </script>
 </body>

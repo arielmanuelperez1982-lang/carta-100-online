@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>100 - Carta Digital</title>
+    <title>100 - One More Night | Carta</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0a0a0a;
             --card-bg: #141414;
-            --accent: #ffffff;
             --text-main: #f0f0f0;
             --text-muted: #888888;
             --border: #262626;
@@ -19,15 +18,15 @@
         
         header {
             text-align: center;
-            padding: 30px 20px 15px;
+            padding: 25px 20px 15px;
             border-bottom: 1px solid var(--border);
             background: rgba(10,10,10,0.95);
             position: sticky;
             top: 0;
             z-index: 100;
         }
-        .logo-img { max-width: 90px; margin-bottom: 10px; filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1)); }
-        h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; }
+        .logo-img { max-width: 60px; margin-bottom: 8px; filter: drop-shadow(0 2px 8px rgba(255,255,255,0.1)); }
+        h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 2px; }
         .mesa-badge { display: inline-block; margin-top: 5px; padding: 4px 12px; background: #222; border-radius: 20px; font-size: 0.85rem; color: #aaa; border: 1px solid #333; }
 
         /* Categorías */
@@ -149,6 +148,7 @@
 
     <div id="pin-overlay">
         <div class="pin-box">
+            <img src="{{ url_for('static', filename='logo_100.png') }}" alt="Logo 100" style="width: 50px; margin-bottom: 12px;">
             <h2>INGRESO MESA</h2>
             <p>Ingresa el PIN provisto en la barra para acceder a la carta.</p>
             <input type="password" id="pin-input" class="pin-input" maxlength="6" placeholder="••••">
@@ -158,6 +158,7 @@
     </div>
 
     <header>
+        <img src="{{ url_for('static', filename='logo_100.png') }}" alt="Logo 100" class="logo-img">
         <h1>100 ONE MORE NIGHT</h1>
         <div class="mesa-badge" id="label-mesa">Mesa --</div>
     </header>
@@ -181,18 +182,22 @@
     </div>
 
     <script>
+        // Carta completa de bebidas actualizada
         const cartaItems = [
             { id: 1, categoria: "Cocktails", nombre: "Fernet 100", desc: "Fernet Branca con Coca-Cola tirada bien helada.", precio: 7000 },
             { id: 2, categoria: "Cocktails", nombre: "Gin Tonic 100", desc: "Gin artesanal, agua tónica premium, rodaja de limón.", precio: 7500 },
             { id: 3, categoria: "Cocktails", nombre: "Vodka con Speed / Naranja", desc: "Vodka importado con energizante o jugo cítrico.", precio: 7500 },
             { id: 4, categoria: "Cocktails", nombre: "Campari Orange", desc: "Campari con jugo de naranja exprimido y hielo.", precio: 7200 },
             { id: 5, categoria: "Cocktails", nombre: "Ron con Cola", desc: "Ron añejo con Coca-Cola y lima.", precio: 7000 },
-            { id: 6, categoria: "Vinos & Espumantes", nombre: "Champagne Extra Brut", desc: "Botella 750ml ideal para brindar en la noche.", precio: 22000 },
-            { id: 7, categoria: "Vinos & Espumantes", nombre: "Vino Tinto Malbec (Copa)", desc: "Copa de vino seleccionado de alta gama.", precio: 6000 },
-            { id: 8, categoria: "Cervezas", nombre: "Cerveza Corona (Línea)", desc: "Botella 330ml con limón.", precio: 5500 },
-            { id: 9, categoria: "Cervezas", nombre: "Cerveza Patagonia Amber Lager", desc: "Pinta tirada artesanal.", precio: 5800 },
-            { id: 10, categoria: "Sin Alcohol", nombre: "Agua Mineral / Saborizada", desc: "500ml sin gas o con gas.", precio: 3000 },
-            { id: 11, categoria: "Sin Alcohol", nombre: "Bebida Energizante Speed", desc: "Lata 250ml.", precio: 4500 }
+            { id: 6, categoria: "Cocktails", nombre: "Mulberry Spritz", desc: "Espumante, cordial de frutos rojos y agua tónica.", precio: 8000 },
+            { id: 7, categoria: "Cocktails", nombre: "Yorkers Vibes", desc: "Bourbon, reducción de frutas de estación y cítricos.", precio: 8500 },
+            { id: 8, categoria: "Cocktails", nombre: "Gangsta Tape", desc: "Trago de autor fuerte a base de ron especiado y jengibre.", precio: 8500 },
+            { id: 9, categoria: "Vinos & Espumantes", nombre: "Champagne Extra Brut", desc: "Botella 750ml ideal para brindar en la noche.", precio: 22000 },
+            { id: 10, categoria: "Vinos & Espumantes", nombre: "Vino Tinto Malbec (Copa)", desc: "Copa de vino seleccionado de alta gama.", precio: 6000 },
+            { id: 11, categoria: "Cervezas", nombre: "Cerveza Corona (Línea)", desc: "Botella 330ml con limón.", precio: 5500 },
+            { id: 12, categoria: "Cervezas", nombre: "Cerveza Patagonia Amber Lager", desc: "Pinta tirada artesanal.", precio: 5800 },
+            { id: 13, categoria: "Sin Alcohol", nombre: "Agua Mineral / Saborizada", desc: "500ml sin gas o con gas.", precio: 3000 },
+            { id: 14, categoria: "Sin Alcohol", nombre: "Bebida Energizante Speed", desc: "Lata 250ml.", precio: 4500 }
         ];
 
         let carrito = {};
@@ -202,7 +207,6 @@
         if(urlParams.get('mesa')) { mesaActual = urlParams.get('mesa'); }
         document.getElementById('label-mesa').innerText = "Mesa " + mesaActual;
 
-        // Si ya puso el PIN antes en esta sesión del navegador, ocultar el overlay
         if(sessionStorage.getItem('pin_ok') === 'true') {
             document.getElementById('pin-overlay').style.display = 'none';
         }
