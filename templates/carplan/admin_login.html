@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 - Acceso Administrador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+        body { background: #0a0a0a; color: #f0f0f0; display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
+        .login-box { background: #141414; border: 1px solid #262626; padding: 35px; border-radius: 16px; width: 100%; max-width: 380px; text-align: center; }
+        .logo-img { max-width: 55px; margin-bottom: 15px; }
+        h2 { font-size: 1.3rem; margin-bottom: 8px; letter-spacing: 1px; }
+        p { font-size: 0.8rem; color: #888; margin-bottom: 20px; }
+        input { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 12px; font-size: 1.2rem; text-align: center; border-radius: 8px; margin-bottom: 15px; }
+        button { width: 100%; background: #fff; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .error { color: #ff4444; font-size: 0.8rem; margin-top: 12px; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="{{ url_for('static', filename='logo_100.png') }}" alt="Logo 100" class="logo-img">
+        <h2>PANEL GERENCIAL</h2>
+        <p>Ingresa la clave de administración</p>
+        <form method="POST">
+            <input type="password" name="pin" placeholder="••••••••" required autofocus>
+            <button type="submit">ACCEDER</button>
+        </form>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+    </div>
+</body>
+</html>

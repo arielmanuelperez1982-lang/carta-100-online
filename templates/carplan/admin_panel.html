@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 - Panel de Administración de Carta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
+        body { background: #0a0a0a; color: #f0f0f0; padding: 30px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #262626; padding-bottom: 20px; margin-bottom: 30px; }
+        h1 { font-size: 1.4rem; letter-spacing: 1px; }
+        .btn-volver { background: #222; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+        
+        .grid-admin { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; max-width: 1300px; margin: 0 auto; }
+        @media(max-width: 900px) { .grid-admin { grid-template-columns: 1fr; } }
+
+        .card { background: #141414; border: 1px solid #262626; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        
+        form label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 4px; }
+        form input, form select, form textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.9rem; }
+        .btn-main { background: #fff; color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: 700; cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #222; }
+        th { color: #888; font-size: 0.8rem; text-transform: uppercase; }
+        .input-precio { width: 90px; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 6px; border-radius: 4px; text-align: center; }
+        .btn-guardar { background: #00cc44; color: #000; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>GESTIÓN DE CARTA - 100</h1>
+        <div>
+            <a href="/caja" class="btn-volver" style="margin-right: 10px;">Ir a Caja</a>
+            <a href="/admin" class="btn-volver">Cerrar Sesión</a>
+        </div>
+    </header>
+
+    <div class="grid-admin">
+        <div>
+            <!-- Cargar Excel -->
+            <div class="card">
+                <h3>Carga Masiva (Excel)</h3>
+                <p style="font-size: 0.8rem; color: #888; margin-bottom: 12px;">Sube un archivo `.xlsx` con columnas: <code>categoria</code>, <code>nombre</code>, <code>desc</code>, <code>precio</code>.</p>
+                <form action="/admin/subir-excel" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="archivo_excel" accept=".xlsx, .xls" required>
+                    <button type="submit" class="btn-main">SUBIR Y ACTUALIZAR CARTA</button>
+                </form>
+            </div>
+
+            <!-- Agregar Trago Individual -->
+            <div class="card">
+                <h3>Agregar Nuevo Trago</h3>
+                <form action="/admin/agregar-item" method="POST">
+                    <label>Categoría</label>
+                    <select name="categoria">
+                        <option value="Cocktails">Cocktails</option>
+                        <option value="Vinos & Espumantes">Vinos & Espumantes</option>
+                        <option value="Cervezas">Cervezas</option>
+                        <option value="Sin Alcohol">Sin Alcohol</option>
+                    </select>
+                    
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" required placeholder="Ej: Fernet 100">
+                    
+                    <label>Descripción</label>
+                    <input type="text" name="desc" required placeholder="Ej: Con Coca-Cola tirada">
+                    
+                    <label>Precio ($)</label>
+                    <input type="number" name="precio" required placeholder="7000">
+                    
+                    <button type="submit" class="btn-main">GUARDAR TRAGO</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Listado completo editable en pantalla -->
+        <div>
+            <div class="card">
+                <h3>Tragos Actuales en la Carta</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cat.</th>
+                            <th>Nombre</th>
+                            <th>Precio ($)</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td style="color: #888; font-size: 0.8rem;">{{ item.categoria }}</td>
+                            <td>
+                                <b>{{ item.nombre }}</b><br>
+                                <span style="font-size: 0.75rem; color: #777;">{{ item.desc }}</span>
+                            </td>
+                            <td>
+                                <input type="number" id="precio-{{ item.id }}" class="input-precio" value="{{ item.precio }}">
+                            </td>
+                            <td>
+                                <button class="btn-guardar" onclick="actualizarPrecio({{ item.id }})">Actualizar</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function actualizarPrecio(id) {
+            let nuevoPrecio = document.getElementById('precio-' + id).value;
+            fetch('/admin/actualizar-precio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, precio: nuevoPrecio })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert("¡Precio actualizado con éxito!");
+                } else {
+                    alert("Error al actualizar precio.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
