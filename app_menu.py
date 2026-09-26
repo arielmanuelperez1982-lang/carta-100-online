@@ -73,6 +73,17 @@ def init_db():
             cursor.execute('INSERT INTO mesas (numero, estado, items_actuales, historial) VALUES (?, ?, ?, ?)',
                            (mesa_num, 'libre', '[]', '[]'))
             
+    if os.path.exists('menu.xlsx'):
+        try:
+            df = pd.read_excel('menu.xlsx')
+            cursor.execute('DELETE FROM carta')
+            for _, row in df.iterrows():
+                cursor.execute('INSERT INTO carta (categoria, nombre, desc, precio) VALUES (?, ?, ?, ?)',
+                               (str(row.get('categoria')), str(row.get('nombre')), str(row.get('descripcion', '')), int(row.get('precio'))))
+            conn.commit()
+            print("Carta cargada automáticamente desde menu.xlsx")
+        except Exception as e:
+            print("Error cargando menu.xlsx automático:", e)
     conn.commit()
     conn.close()
 
@@ -191,18 +202,48 @@ def admin_subir_excel():
         if file.filename != '':
             try:
                 df = pd.read_excel(file)
+                
+                # Normalizar nombres de columnas a minúsculas y sin espacios extra
+                df.columns = df.columns.str.strip().str.lower()
+                
+                # Mapeo por si tienen acentos o nombres similares
+                col_map = {}
+                for col in df.columns:
+                    if 'cat' in col: col_map[col] = 'categoria'
+                    elif 'nom' in col: col_map[col] = 'nombre'
+                    elif 'desc' in col: col_map[col] = 'descripcion'
+                    elif 'prec' in col: col_map[col] = 'precio'
+                
+                df = df.rename(columns=col_map)
+                
+                # Verificar que existan las columnas obligatorias
+                required = ['categoria', 'nombre', 'precio']
+                if not all(col in df.columns for col in required):
+                    print("Error: Faltan columnas obligatorias en el Excel.")
+                    return redirect(url_for('admin_panel'))
+
                 conn = sqlite3.connect(DB_NAME)
                 cursor = conn.cursor()
-                # Borramos la carta anterior para reemplazarla por la del Excel limpio
+                
+                # Borramos la carta anterior para reemplazarla por la nueva
                 cursor.execute('DELETE FROM carta')
                 
                 for _, row in df.iterrows():
+                    cat = str(row.get('categoria', ''))
+                    nom = str(row.get('nombre', ''))
+                    desc = str(row.get('descripcion', '')) if 'descripcion' in df.columns else ''
+                    # Limpiar el precio por si tiene símbolos tipo '$' o puntos
+                    precio_raw = str(row.get('precio', 0)).replace('$', '').replace('.', '').strip()
+                    precio = int(float(precio_raw)) if precio_raw else 0
+                    
                     cursor.execute('INSERT INTO carta (categoria, nombre, desc, precio) VALUES (?, ?, ?, ?)',
-                                   (str(row['categoria']), str(row['nombre']), str(row['descripcion']), int(row['precio'])))
+                                   (cat, nom, desc, precio))
+                
                 conn.commit()
                 conn.close()
+                print("¡Excel cargado y guardado con éxito en la base de datos!")
             except Exception as e:
-                print("Error al procesar excel:", e)
+                print("Error detallado al procesar excel:", e)
                 
     return redirect(url_for('admin_panel'))
 
