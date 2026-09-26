@@ -108,7 +108,9 @@ def get_mesas_estado():
 
 @app.route('/')
 def menu():
-    return render_template('menu.html', items=get_carta())
+    # Nos aseguramos de consultar la base de datos fresca en cada recarga
+    items_actualizados = get_carta()
+    return render_template('menu.html', items=items_actualizados)
 
 @app.route('/api/carta')
 def api_carta():
