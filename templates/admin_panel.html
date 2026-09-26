@@ -1,32 +1,250 @@
-<!-- Listado de Ventas Históricas y Diarias -->
-        <div style="grid-column: 1 / -1; margin-top: 20px;">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - 100 Puerto Madero</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #ffffff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .btn-volver {
+            background-color: #333;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .btn-volver:hover {
+            background-color: #444;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #00cc44;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #00e64d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        th {
+            background-color: #252525;
+            color: #00cc44;
+        }
+        .input-precio {
+            width: 90px;
+            padding: 5px;
+            background-color: #2a2a2a;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .btn-actualizar {
+            padding: 5px 10px;
+            background-color: #00cc44;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Panel de Administración - 100</h1>
+            <a href="/caja" class="btn-volver">Ir a Control de Caja</a>
+        </div>
+
+        <div class="grid">
+            <!-- Subir Excel -->
             <div class="card">
-                <h3>Historial de Ventas y Cierres de Caja (Persistente por Día)</h3>
+                <h3>📂 Actualizar Carta por Excel</h3>
+                <p style="color: #aaa; font-size: 14px;">Sube el archivo Excel limpio con las columnas: <code>categoria</code>, <code>nombre</code>, <code>descripcion</code>, <code>precio</code>.</p>
+                <form action="/admin/subir-excel" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="archivo_excel" accept=".xlsx" required>
+                    <button type="submit">Reemplazar y Actualizar Carta</button>
+                </form>
+            </div>
+
+            <!-- Agregar Producto Individual -->
+            <div class="card">
+                <h3>➕ Agregar Nuevo Ítem</h3>
+                <form action="/admin/agregar-item" method="POST">
+                    <label>Categoría:</label>
+                    <input type="text" name="categoria" placeholder="ej. Burbujas (Champagne & Espumantes)" required>
+                    
+                    <label>Nombre del Producto:</label>
+                    <input type="text" name="nombre" placeholder="ej. Chandon Extra Brut" required>
+                    
+                    <label>Descripción / Observaciones:</label>
+                    <input type="text" name="desc" placeholder="ej. Incluye 4 latas de Red Bull">
+                    
+                    <label>Precio (ARS):</label>
+                    <input type="number" name="precio" placeholder="ej. 90000" required>
+                    
+                    <button type="submit">Guardar Producto</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modificar Precios de la Carta Actual -->
+        <div class="card" style="margin-top: 20px;">
+            <h3>📋 Modificar Precios Actuales</h3>
+            <div style="overflow-x: auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Mesa</th>
-                            <th>Detalle</th>
-                            <th>Total Cobrado</th>
+                            <th>Categoría</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio Actual</th>
+                            <th>Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for v in ventas %}
+                        {% for item in items %}
                         <tr>
-                            <td>{{ v.fecha }}</td>
-                            <td style="color: #888;">{{ v.timestamp }}</td>
-                            <td><b>Mesa {{ v.mesa }}</b></td>
-                            <td>{{ v.detalle }}</td>
-                            <td style="color: #00cc44; font-weight: bold;">${{ "{:,}".format(v.total).replace(',', '.') }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" style="text-align: center; color: #666; padding: 20px;">Aún no hay ventas registradas.</td>
+                            <td>{{ item.categoria }}</td>
+                            <td><b>{{ item.nombre }}</b></td>
+                            <td style="color: #888; font-size: 13px;">{{ item.desc }}</td>
+                            <td>
+                                $<input type="number" id="precio-{{ item.id }}" value="{{ item.precio }}" class="input-precio">
+                            </td>
+                            <td>
+                                <button class="btn-actualizar" onclick="actualizarPrecio('{{ item.id }}')">Actualizar</button>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Listado de Ventas Históricas y Diarias -->
+        <div style="grid-column: 1 / -1; margin-top: 20px;">
+            <div class="card">
+                <h3>📊 Historial de Ventas y Cierres de Caja (Persistente por Día)</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Mesa</th>
+                                <th>Detalle</th>
+                                <th>Total Cobrado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in ventas %}
+                            <tr>
+                                <td>{{ v.fecha }}</td>
+                                <td style="color: #888;">{{ v.timestamp }}</td>
+                                <td><b>Mesa {{ v.mesa }}</b></td>
+                                <td>{{ v.detalle }}</td>
+                                <td style="color: #00cc44; font-weight: bold;">${{ "{:,}".format(v.total).replace(',', '.') }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #666; padding: 20px;">Aún no hay ventas registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function actualizarPrecio(id) {
+            const nuevoPrecio = document.getElementById(`precio-${id}`).value;
+            
+            fetch('/admin/actualizar-precio', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: id, precio: nuevoPrecio })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert('¡Precio actualizado correctamente!');
+                    location.reload();
+                } else {
+                    alert('Error al actualizar el precio.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error de conexión.');
+            });
+        }
+    </script>
+</body>
+</html>
