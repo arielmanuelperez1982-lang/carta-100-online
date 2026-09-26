@@ -84,6 +84,29 @@ def init_db():
             print("Carta cargada automáticamente desde menu.xlsx")
         except Exception as e:
             print("Error cargando menu.xlsx automático:", e)
+
+    # Bloque de lectura de Excel en init_db
+    print("--- INICIANDO VERIFICACIÓN DE EXCEL ---")
+    print("Archivos en el directorio actual:", os.listdir('.'))
+    
+    if os.path.exists('menu.xlsx'):
+        print("¡El archivo menu.xlsx SÍ existe en el servidor!")
+        try:
+            df = pd.read_excel('menu.xlsx')
+            print("Columnas encontradas en el Excel:", df.columns.tolist())
+            print(f"Total de filas leídas del Excel: {len(df)}")
+            
+            cursor.execute('DELETE FROM carta')
+            for _, row in df.iterrows():
+                cursor.execute('INSERT INTO carta (categoria, nombre, desc, precio) VALUES (?, ?, ?, ?)',
+                               (str(row.get('categoria')), str(row.get('nombre')), str(row.get('descripcion', '')), int(row.get('precio'))))
+            conn.commit()
+            print("¡ÉXITO: Carta actualizada en SQLite desde menu.xlsx!")
+        except Exception as e:
+            print("ERROR CRÍTICO leyendo menu.xlsx:", e)
+    else:
+        print("AVISO: No se encontró el archivo menu.xlsx en el directorio del servidor.")
+    print("--- FIN DE VERIFICACIÓN ---")        
     conn.commit()
     conn.close()
 
