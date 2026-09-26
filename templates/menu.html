@@ -14,7 +14,7 @@
             --border: #262626;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 140px; } /* Aumentado padding para el footer más alto */
         
         header {
             text-align: center;
@@ -89,22 +89,48 @@
         .btn-cant { background: none; border: none; color: #fff; font-size: 1.1rem; width: 32px; height: 32px; cursor: pointer; }
         .num-cant { width: 28px; text-align: center; font-size: 0.95rem; font-weight: 600; }
 
-        /* Barra Inferior del Pedido */
+        /* Barra Inferior del Pedido con Selección de Pago */
         .footer-pedido {
             position: fixed;
             bottom: 0; left: 0; width: 100%;
-            background: rgba(15, 15, 15, 0.95);
+            background: rgba(15, 15, 15, 0.98);
             backdrop-filter: blur(10px);
             border-top: 1px solid var(--border);
             padding: 15px 20px;
             display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-sizing: border-box;
+            z-index: 99;
+        }
+        .footer-top {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
         }
         .total-texto { font-size: 0.9rem; color: var(--text-muted); }
         .total-monto { font-size: 1.2rem; font-weight: 700; color: #fff; }
         .btn-enviar { background: #fff; color: #000; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        
+        .pago-selector-container {
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+        .pago-selector-container label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 4px;
+        }
+        .pago-select {
+            width: 100%;
+            background: #0a0a0a;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
 
         /* Pantalla de PIN */
         #pin-overlay {
@@ -173,17 +199,29 @@
 
     <div class="container" id="menu-container"></div>
 
+    <!-- Barra Inferior con Resumen y Método de Pago -->
     <div class="footer-pedido">
-        <div>
-            <div class="total-texto">Total estimado</div>
-            <div class="total-monto" id="total-precio">$0</div>
+        <div class="footer-top">
+            <div>
+                <div class="total-texto">Total estimado</div>
+                <div class="total-monto" id="total-precio">$0</div>
+            </div>
+            <button class="btn-enviar" onclick="enviarPedido()">ENVIAR PEDIDO</button>
         </div>
-        <button class="btn-enviar" onclick="enviarPedido()">ENVIAR PEDIDO</button>
+        
+        <div class="pago-selector-container">
+            <label for="metodo-pago">¿Cómo deseas abonar?</label>
+            <select id="metodo-pago" class="pago-select">
+                <option value="Efectivo">💵 Efectivo</option>
+                <option value="Tarjeta Débito/Crédito">💳 Tarjeta Débito / Crédito</option>
+                <option value="QR">📱 QR (Mercado Pago / Ualá)</option>
+                <option value="Tarjeta de Mesa">🏷️ Tarjeta de Mesa</option>
+            </select>
+        </div>
     </div>
 
     <script>
-        // Carta completa de bebidas actualizada
-       const cartaItems = {{ items | tojson | safe }};
+        const cartaItems = {{ items | tojson | safe }};
 
         let carrito = {};
         let mesaActual = "1";
@@ -220,7 +258,6 @@
             const container = document.getElementById('menu-container');
             container.innerHTML = '';
             
-            // Obtener categorías únicas dinámicamente
             let categoriasUnicas = filtro === 'todos' ? [...new Set(cartaItems.map(i => i.categoria))] : [filtro];
 
             categoriasUnicas.forEach(cat => {
@@ -229,7 +266,6 @@
 
                 let htmlCat = `<div class="seccion-titulo">${cat}</div>`;
                 itemsCat.forEach((item, index) => {
-                    // Usamos el id del ítem o el índice si no viene id de la base de datos
                     let itemId = item.id || index;
                     let cant = carrito[itemId] || 0;
                     
@@ -285,15 +321,21 @@
             }
             if(itemsPedido.length === 0) { alert("Selecciona al menos una bebida."); return; }
 
+            let metodoPagoSeleccionado = document.getElementById('metodo-pago').value;
+
             fetch('/api/pedido', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mesa: mesaActual, items: itemsPedido })
+                body: JSON.stringify({ 
+                    mesa: mesaActual, 
+                    items: itemsPedido, 
+                    metodo_pago: metodoPagoSeleccionado 
+                })
             })
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    alert("¡Pedido enviado a la barra con éxito!");
+                    alert("¡Pedido enviado con éxito!");
                     carrito = {};
                     renderizarMenu();
                     actualizarTotal();

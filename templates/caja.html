@@ -15,7 +15,7 @@
 
         .grid-mesas {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
             gap: 15px;
             max-width: 1200px;
             margin: 0 auto;
@@ -25,7 +25,7 @@
             border: 2px solid #262626;
             border-radius: 12px;
             padding: 14px;
-            min-height: 150px;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -40,7 +40,10 @@
         .mesa-card.pendiente_pago { border-color: #ffbb00; background: #1a180f; } /* Amarillo: Pendiente de pago */
 
         .mesa-titulo { font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .item-lista { font-size: 0.8rem; color: #ccc; margin-bottom: 3px; }
+        
+        .pedido-bloque { background: #1e1e1e; padding: 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid #ff4444; }
+        .metodo-pago-tag { font-size: 0.75rem; color: #00cc44; font-weight: bold; margin-bottom: 3px; display: block; }
+        .item-lista { font-size: 0.8rem; color: #ccc; margin-bottom: 2px; }
         
         .acciones-mesa { display: flex; gap: 6px; margin-top: 10px; }
         .btn-accion {
@@ -83,14 +86,18 @@
                         {% else %}🟢{% endif %}
                     </span>
                 </div>
+                
                 {% if data.items_actuales %}
                     {% for pedido in data.items_actuales %}
-                        {% for item in pedido['items'] %}
-                        <div class="item-lista">• {{ item.cantidad }}x {{ item.nombre }}</div>
-                        {% endfor %}
+                        <div class="pedido-bloque">
+                            <span class="metodo-pago-tag">💳 Pago: {{ pedido.metodo_pago | default('Efectivo') }}</span>
+                            {% for item in pedido['items'] %}
+                            <div class="item-lista">• {{ item.cantidad }}x {{ item.nombre }} (${{ item.precio }})</div>
+                            {% endfor %}
+                        </div>
                     {% endfor %}
                 {% else %}
-                    <div style="color: #666; font-size: 0.8rem; font-style: italic;">Sin pedidos activos</div>
+                    <div style="color: #666; font-size: 0.8rem; font-style: italic; padding: 10px 0;">Sin pedidos activos (Haz clic para ver historial)</div>
                 {% endif %}
             </div>
             
@@ -131,22 +138,15 @@
         }
 
         function verHistorial(numMesa, historial) {
-            document.getElementById('modal-titulo').innerText = "Historial Completo - Mesa " + numMesa;
+            document.getElementById('modal-titulo').innerText = "Historial - Mesa " + numMesa;
             let body = document.getElementById('modal-body');
             body.innerHTML = '';
             
             if(!historial || historial.length === 0) {
-                body.innerHTML = '<p style="color:#777; font-size:0.9rem;">No hay registros de pedidos en esta mesa durante la noche.</p>';
+                body.innerHTML = '<p style="color:#777; font-size:0.9rem;">No hay registros previos en esta mesa.</p>';
             } else {
                 historial.forEach((h, index) => {
-                    let txt = `<div class="historial-item"><b>Evento #${index+1} (${h.tipo}):</b> `;
-                    if(typeof h.detalle === 'object') {
-                        let detalleStr = h.detalle.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
-                        txt += detalleStr;
-                    } else {
-                        txt += h.detalle;
-                    }
-                    txt += `</div>`;
+                    let txt = `<div class="historial-item"><b>[${h.hora || '---'}]</b> ${h.detalle || h.tipo}</div>`;
                     body.innerHTML += txt;
                 });
             }

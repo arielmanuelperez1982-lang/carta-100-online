@@ -283,7 +283,8 @@ def verificar_pin():
 def recibir_pedido():
     data = request.get_json()
     mesa = str(data.get('mesa'))
-    items = data.get('items') # Lista de productos solicitados
+    items = data.get('items')
+    metodo_pago = data.get('metodo_pago', 'Efectivo') # Capturamos el método de pago
     
     mesas = get_mesas_estado()
     if mesa in mesas:
@@ -291,9 +292,17 @@ def recibir_pedido():
         estado_mesa = mesas[mesa]
         estado_mesa["estado"] = "preparando"
         
-        nuevo_pedido = { "items": items, "estado_pago": "pendiente" }
+        nuevo_pedido = { 
+            "items": items, 
+            "metodo_pago": metodo_pago, 
+            "estado_pago": "pendiente" 
+        }
         estado_mesa["items_actuales"].append(nuevo_pedido)
-        estado_mesa["historial"].append({"tipo": "nuevo_pedido", "detalle": items, "hora": datetime.now().strftime("%H:%M:%S")})
+        estado_mesa["historial"].append({
+            "tipo": "nuevo_pedido", 
+            "detalle": f"Pedido enviado (Pago: {metodo_pago})", 
+            "hora": datetime.now().strftime("%H:%M:%S")
+        })
         
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
