@@ -76,7 +76,10 @@
 
     <div class="grid-mesas">
         {% for num, data in mesas.items() %}
-        <div class="mesa-card {{ data.estado }}" onclick="verHistorial('{{ num }}', {{ data.historial | tojson }})">
+        <!-- Se usa data-historial para evitar errores de sintaxis con las comillas del JSON -->
+        <div class="mesa-card {{ data.estado }}" 
+             data-historial='{{ data.historial | tojson | safe }}'
+             onclick="abrirHistorialDesdeCard(this, '{{ num }}')">
             <div>
                 <div class="mesa-titulo">
                     <span>Mesa {{ num }}</span>
@@ -135,6 +138,17 @@
             .then(data => {
                 if(data.success) location.reload();
             });
+        }
+
+        function abrirHistorialDesdeCard(element, numMesa) {
+            let historialRaw = element.getAttribute('data-historial');
+            let historial = [];
+            try {
+                historial = JSON.parse(historialRaw);
+            } catch(e) {
+                historial = [];
+            }
+            verHistorial(numMesa, historial);
         }
 
         function verHistorial(numMesa, historial) {

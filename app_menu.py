@@ -322,12 +322,13 @@ def cambiar_estado(mesa):
     if mesa in mesas:
         import json
         estado_mesa = mesas[mesa]
-        estado_mesa["estado"] = nuevo_estado
         
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         
         try:
+            hora_actual = datetime.now().strftime("%H:%M:%S")
+            
             if nuevo_estado == "pagado":
                 # Calcular total de los ítems actuales para registrar venta diaria
                 total_venta = 0
@@ -337,18 +338,29 @@ def cambiar_estado(mesa):
                 
                 # Registrar en ventas diarias
                 fecha_hoy = datetime.now().strftime("%Y-%m-%d")
-                hora_actual = datetime.now().strftime("%H:%M:%S")
                 detalle_str = f"Mesa {mesa} - Cerrada y Pagada"
                 
                 cursor.execute('INSERT INTO ventas_diarias (fecha, mesa, detalle, total, timestamp) VALUES (?, ?, ?, ?, ?)',
                                (fecha_hoy, mesa, detalle_str, total_venta, hora_actual))
                 
-                # Limpiar mesa y pasar a libre
+                # Agregamos el evento de pago al historial ANTES de vaciar los items actuales, 
+                # o guardamos un respaldo para que el historial lo muestre
+                estado_mesa["historial"].append({
+                    "tipo": "pago_confirmado", 
+                    "detalle": f"Mesa pagada y cerrada. Total: ${total_venta}", 
+                    "hora": hora_actual
+                })
+                
+                # Liberamos la mesa y limpiamos los ítems actuales para que quede libre para otro cliente
                 estado_mesa["items_actuales"] = []
                 estado_mesa["estado"] = "libre"
-                estado_mesa["historial"].append({"tipo": "pago_confirmado", "detalle": f"Total cobrado: ${total_venta}", "hora": hora_actual})
             else:
-                estado_mesa["historial"].append({"tipo": "cambio_estado", "detalle": f"Estado cambiado a {nuevo_estado}", "hora": datetime.now().strftime("%H:%M:%S")})
+                estado_mesa["estado"] = nuevo_estado
+                estado_mesa["historial"].append({
+                    "tipo": "cambio_estado", 
+                    "detalle": f"Estado cambiado a {nuevo_estado}", 
+                    "hora": hora_actual
+                })
                 
             cursor.execute('UPDATE mesas SET estado = ?, items_actuales = ?, historial = ? WHERE numero = ?',
                            (estado_mesa["estado"], json.dumps(estado_mesa["items_actuales"]), json.dumps(estado_mesa["historial"]), mesa))
