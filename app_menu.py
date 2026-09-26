@@ -315,37 +315,44 @@ def cambiar_estado(mesa):
         estado_mesa = mesas[mesa]
         estado_mesa["estado"] = nuevo_estado
         
-        if nuevo_estado == "pagado":
-            # Calcular total de los ítems actuales para registrar venta diaria
-            total_venta = 0
-            for ped in estado_mesa["items_actuales"]:
-                for itm in ped.get("items", []):
-                    total_venta += int(itm.get('precio', 0)) * int(itm.get('cantidad', 1))
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        
+        try:
+            if nuevo_estado == "pagado":
+                # Calcular total de los ítems actuales para registrar venta diaria
+                total_venta = 0
+                for ped in estado_mesa["items_actuales"]:
+                    for itm in ped.get("items", []):
+                        total_venta += int(itm.get('precio', 0)) * int(itm.get('cantidad', 1))
+                
+                # Registrar en ventas diarias
+                fecha_hoy = datetime.now().strftime("%Y-%m-%d")
+                hora_actual = datetime.now().strftime("%H:%M:%S")
+                detalle_str = f"Mesa {mesa} - Cerrada y Pagada"
+                
+                cursor.execute('INSERT INTO ventas_diarias (fecha, mesa, detalle, total, timestamp) VALUES (?, ?, ?, ?, ?)',
+                               (fecha_hoy, mesa, detalle_str, total_venta, hora_actual))
+                
+                # Limpiar mesa y pasar a libre
+                estado_mesa["items_actuales"] = []
+                estado_mesa["estado"] = "libre"
+                estado_mesa["historial"].append({"tipo": "pago_confirmado", "detalle": f"Total cobrado: ${total_venta}", "hora": hora_actual})
+            else:
+                estado_mesa["historial"].append({"tipo": "cambio_estado", "detalle": f"Estado cambiado a {nuevo_estado}", "hora": datetime.now().strftime("%H:%M:%S")})
+                
+            cursor.execute('UPDATE mesas SET estado = ?, items_actuales = ?, historial = ? WHERE numero = ?',
+                           (estado_mesa["estado"], json.dumps(estado_mesa["items_actuales"]), json.dumps(estado_mesa["historial"]), mesa))
             
-            # Registrar en ventas diarias
-            fecha_hoy = datetime.now().strftime("%Y-%m-%d")
-            hora_actual = datetime.now().strftime("%H:%M:%S")
-            detalle_str = f"Mesa {mesa} - Cerrada y Pagada"
+            conn.commit()
+            conn.close()
+            return jsonify({"success": True})
             
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
-            cursor.execute('INSERT INTO ventas_diarias (fecha, mesa, detalle, total, timestamp) VALUES (?, ?, ?, ?, ?)',
-                           (fecha_hoy, mesa, detalle_str, total_venta, hora_actual))
+        except Exception as e:
+            print("Error al cambiar estado / pagar:", e)
+            conn.close()
+            return jsonify({"success": False, "error": str(e)}), 500
             
-            # Limpiar mesa y pasar a libre
-            estado_mesa["items_actuales"] = []
-            estado_mesa["estado"] = "libre"
-            estado_mesa["historial"].append({"tipo": "pago_confirmado", "detalle": f"Total cobrado: ${total_venta}", "hora": hora_actual})
-        else:
-            estado_mesa["historial"].append({"tipo": "cambio_estado", "detalle": f"Estado cambiado a {nuevo_estado}", "hora": datetime.now().strftime("%H:%M:%S")})
-            
-        cursor = sqlite3.connect(DB_NAME)
-        cur = cursor.cursor()
-        cur.execute('UPDATE mesas SET estado = ?, items_actuales = ?, historial = ? WHERE numero = ?',
-                    (estado_mesa["estado"], json.dumps(estado_mesa["items_actuales"]), json.dumps(estado_mesa["historial"]), mesa))
-        cursor.commit()
-        cursor.close()
-        return jsonify({"success": True})
     return jsonify({"success": False}), 400
 
 @app.route('/api/liberar/<mesa>', methods=['POST'])
